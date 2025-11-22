@@ -1,0 +1,10 @@
+# Example Cloud Run service config for backend (placeholder)
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: copilot-log-backend
+spec:
+  template:
+    spec:
+      containers:
+      - image: gcr.io/PROJECT_ID/copilot-backend:latest
