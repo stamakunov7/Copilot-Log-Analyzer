@@ -3,3 +3,54 @@ flowchart LR
   Backend --> DB
   Backend --> AI
   Backend --> Frontend
+
+flowchart LR
+    subgraph Dev["Developer Environment"]
+        CLI["logwatch CLI
+(run / tail)"]
+        AppLogs["Application / Tests
+(stdout, stderr, log files)"]
+    end
+
+    AppLogs --> CLI
+
+    subgraph Backend["Backend (FastAPI on Cloud Run)"]
+        WS["WebSocket / REST
+Ingestion Service"]
+        Proc["Processing & Aggregation
+(levels, counts, latency, windows)"]
+        Summarizer["AI Summarizer
+(LLM-based root-cause analysis)"]
+        API["REST API
+(sessions, logs, summaries, metrics)"]
+    end
+
+    subgraph Storage["Storage"]
+        DB["PostgreSQL / Spanner
+sessions, log_events, summaries"]
+        MQ["(Optional) Pub/Sub
+log event bus"]
+    end
+
+    subgraph UI["Web Dashboard (React)"]
+        SessionsUI["Sessions List"]
+        LiveLogsUI["Live Log View
+(WebSocket client)"]
+        SummaryUI["AI Summary Panel"]
+        MetricsUI["Metrics & Charts
+(p90/p99, error rates)"]
+    end
+
+    CLI -->|"JSON log events"| WS
+    WS --> MQ
+    MQ --> Proc
+    Proc --> DB
+    Proc --> API
+    Proc --> Summarizer
+    Summarizer --> DB
+    Summarizer --> API
+
+    SessionsUI <-->|REST| API
+    LiveLogsUI <-->|WebSocket| WS
+    SummaryUI <-->|REST| API
+    MetricsUI <-->|REST| API
